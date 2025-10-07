@@ -69,7 +69,15 @@ public class EmailConfigUtil {
         props.put("mail.smtp.host", getProperty("mail.smtp.host"));
         props.put("mail.smtp.port", getProperty("mail.smtp.port"));
         props.put("mail.smtp.auth", getProperty("mail.smtp.auth"));
-        props.put("mail.smtp.starttls.enable", getProperty("mail.smtp.starttls.enable"));
+        
+        // Support both TLS (587) and SSL (465)
+        if (getProperty("mail.smtp.starttls.enable") != null) {
+            props.put("mail.smtp.starttls.enable", getProperty("mail.smtp.starttls.enable"));
+        }
+        if (getProperty("mail.smtp.ssl.enable") != null) {
+            props.put("mail.smtp.ssl.enable", getProperty("mail.smtp.ssl.enable"));
+        }
+        
         props.put("mail.smtp.ssl.trust", getProperty("mail.smtp.host"));
         return props;
     }
