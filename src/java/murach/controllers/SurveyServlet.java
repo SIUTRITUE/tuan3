@@ -5,8 +5,10 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.mail.MessagingException;
 
 import murach.business.User;
+import murach.business.EmailUtil;
 
 public class SurveyServlet extends HttpServlet {
 
@@ -53,6 +55,31 @@ public class SurveyServlet extends HttpServlet {
 
         // store User object in request
         request.setAttribute("user", user);
+
+        // Chapter 14: Gửi email xác nhận sau khi hoàn thành survey
+        boolean emailSent = false;
+        String emailMessage = "";
+        
+        // Gửi email cho tất cả user có email hợp lệ (bỏ điều kiện emailOK)
+        if (user.getEmail() != null && !user.getEmail().trim().isEmpty()) {
+            try {
+                EmailUtil.sendSurveyConfirmationEmail(user);
+                emailSent = true;
+                emailMessage = "Email xác nhận đã được gửi đến " + user.getEmail();
+            } catch (MessagingException | java.io.UnsupportedEncodingException e) {
+                emailSent = false;
+                emailMessage = "Có lỗi khi gửi email: " + e.getMessage();
+                // Log lỗi (trong thực tế nên dùng logging framework)
+                System.err.println("Email sending failed: " + e.getMessage());
+                e.printStackTrace();
+            }
+        } else {
+            emailMessage = "Email không được gửi (email không hợp lệ hoặc trống)";
+        }
+        
+        // Thêm thông tin về việc gửi email vào request
+        request.setAttribute("emailSent", emailSent);
+        request.setAttribute("emailMessage", emailMessage);
 
         // forward request to JSP
         String url = "/survey.jsp";
